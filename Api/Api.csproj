@@ -1,0 +1,108 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <EnableMSDeployAppOffline>true</EnableMSDeployAppOffline>
+    <SatelliteResourceLanguages>es</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="automapper" Version="13.0.1" />
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="7.3.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.1" />
+    <PackageReference Include="NLog" Version="5.2.8" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="5.3.8" />
+    <PackageReference Include="NSwag.AspNetCore" Version="14.0.3" />
+    <PackageReference Include="SkiaSharp" Version="3.116.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+    <InternalsVisibleTo Include="Api.TestsDeIntegracion" />
+    <Folder Include="Api\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\assets\chico-C0mioDsN.jpg" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\dniDorso-CzXPyPZp.jpg" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\dniFrente-KPDtENYZ.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\icono-frambuesa-DaqNCKmH.svg" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-4Qozud4Y.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-6_5vo0Nv.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-8wceCX98.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-9pBnJEtp.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-B1MhrtL0.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-B8W2AUqQ.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-BbCrBg2r.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-BeC5eW1D.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-BggfLbkf.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-BJyPmGYx.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-Bkj5A887.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-Bru-f2C5.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-BzUbVXfh.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-C0AZmjnO.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-C0MVP7Pa.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-C28PzWoG.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-CAyUNmVg.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-CcRPwo-Q.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-Cd6YHd4j.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-Cg-G-YXF.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-Ck3z7HQM.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-CkP1C2Av.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-ClAGYwmE.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-CP_L4G17.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-CRxf2gRT.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-CtIu7qfP.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-Cwah0IRG.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-CWOt1vHP.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-CysXU9s9.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-CytkRwYf.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-CZbhC-tV.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-CZz6qPFf.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-C_gzLSLw.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-D1c4b5wn.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-D3tik_5q.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-Da_kK-7B.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-DCgrvwdA.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-DDjbm6e7.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-DJG7MKJ4.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-DSVPDUpO.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-DWmMNAty.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-DX5b2-lv.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-DXIzddHi.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-DY6TuxO6.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-f2O1Fxdq.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-gKAuuYz9.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-Hepc0C6Q.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-q6CLbEf6.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-RIGdjvFO.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-s588mQv-.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-TmAciTgC.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-wKuIW108.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-zhw8vlOQ.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\index-_qkXGbvi.css" />
+  </ItemGroup>
+
+</Project>
