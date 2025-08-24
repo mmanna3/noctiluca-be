@@ -8,16 +8,16 @@ environment:
     secure: ZumRpgIeGcRgW3H7yXK0bQ==
   deploy_password:
     secure: SFAvHfsz398LTl83QbS5gw==
-  deploy_publish_url_1:
-    secure: K69zP3wjxwDVH7s/sC4OthodaOPs3etcQKSoMEi3J24Zzy/Pqe9QtILQ+TIhpLoJDz6QebuZDVdqciF20w136YeX6zpfMUBdcoVxkrySUdQ=
-  ms_deploy_site_1:
-    secure: kdhuPVSl0krNFGjfcNUmBMLohWaq8nbOx5Ven52IcoU=  
+  deploy_publish_url:
+    secure: QIYfGJ1+d6VJ/xxUp/T7jOvzBVGPfFZC6UFYz08nIysGHmgjF5zU9SQvcl5tbJ2RHK5W9/IgBuv1aJNx09G1bvBM4UsKzfR+4snDUvdXKuvuLIq95yZxXJKV4ewT6h30OsfWxwKTb1JNGzhxmPVneagSB6bDwYcJ81wINqyRIDI=
+  ms_deploy_site:
+    secure: be3uht79X/eogI8gd1fkRot7sd9NQFxU/riUI8GPYZ7DDOr06EW2aTUpoxwDTi7q
   db_server:
     secure: GENtSiIHJlcMVdOs9CjeQw==
   db_name:
-    secure: WrPAgPpTyM3R6EL58lnCDg==
+    secure: hHBJ3rJzhyAeewNTWR9Cwg==
   db_username:
-    secure: WrPAgPpTyM3R6EL58lnCDg==
+    secure: hHBJ3rJzhyAeewNTWR9Cwg==
   db_password:
     secure: SFAvHfsz398LTl83QbS5gw==
   clave_secreta_jwt:
@@ -43,8 +43,8 @@ deploy:
   - provider: WebDeploy
     remove_files: true
     skip_dirs: \\App_Data;\\Imagenes;\\logs;\\aspnet_client;\\wwwroot;\\well-known;
-    server: $(deploy_publish_url_1)
-    website: $(ms_deploy_site_1)
+    server: $(deploy_publish_url)
+    website: $(ms_deploy_site)
     username: $(deploy_username)
     password: $(deploy_password)
     ntlm: false
