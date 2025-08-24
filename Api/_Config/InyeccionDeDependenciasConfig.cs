@@ -21,6 +21,8 @@ public static class InyeccionDeDependenciasConfig
         builder.Services.AddScoped<INotaRepo, NotaRepo>();
         builder.Services.AddScoped<INotaCore, NotaCore>();
         
+        builder.Services.AddScoped<IAuthService, AuthCore>();
+        
         // Configurar la autenticación JWT
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
