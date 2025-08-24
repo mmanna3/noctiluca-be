@@ -15,4 +15,9 @@ public class NotaRepo : RepositorioABM<Nota>, INotaRepo
         entidadNueva.CarpetaId = entidadAnterior.CarpetaId;
         entidadNueva.FechaHora = DateTime.Now;
     }
+    
+    protected override void AntesDeCrear(Nota entidad)
+    {
+        entidad.FechaHora = DateTime.Now;
+    }
 }

@@ -12,6 +12,10 @@ public class MapperConfig : Profile
             .PreserveReferences().ReverseMap();
 
         CreateMap<Nota, NotaDTO>()
-            .PreserveReferences().ReverseMap();
+            .ForMember(dest => dest.CarpetaTitulo, x => x.MapFrom(src => src.Carpeta!.Titulo))
+            .PreserveReferences();
+        
+        CreateMap<NotaDTO, Nota>()
+            .PreserveReferences();
     }
 }

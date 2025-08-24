@@ -74,4 +74,23 @@ public abstract class ABMController<TDTO, TCore> : ControllerBase
 
         return NoContent();
     }
+    
+    // DELETE: api/[controller]/5
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "Administrador")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        try
+        {
+            await Core.Eliminar(id);
+        }
+        catch (Exception e)
+        {
+            if (e is DbUpdateConcurrencyException)
+                return NotFound();
+            throw;
+        }
+
+        return NoContent();
+    }
 }

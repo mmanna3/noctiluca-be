@@ -79,4 +79,28 @@ public abstract class ABMCore<TRepo, TEntidad, TDTO> : ICoreABM<TDTO>
     {
         return Task.FromResult(entidadNueva);
     }
+    
+    public virtual async Task Eliminar(int id)
+    {
+        var entidad = await Repo.ObtenerPorId(id);
+        if (entidad == null)
+            throw new ExcepcionControlada("No existe la entidad a eliminar");
+        
+        await AntesDeEliminar(id, entidad);
+        
+        Repo.Eliminar(entidad);
+        await BDVirtual.GuardarCambios();
+        
+        await DespuesDeEliminar(id, entidad);
+    }
+    
+    protected virtual Task AntesDeEliminar(int id, TEntidad entidad)
+    {
+        return Task.CompletedTask;
+    }
+    
+    protected virtual Task DespuesDeEliminar(int id, TEntidad entidad)
+    {
+        return Task.CompletedTask;
+    }
 }

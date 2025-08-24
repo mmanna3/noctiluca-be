@@ -9,4 +9,5 @@ public class NotaDTO : DTO
     public string? Cuerpo { get; set; }
     public DateTime FechaHora { get; set; }
     public int CarpetaId { get; set; }
+    public string? CarpetaTitulo { get; set; }
 }
