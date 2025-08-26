@@ -4,6 +4,7 @@ using Api.Persistencia._Config;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250826013557_AgregaCarpetasRequiereAutenticacion")]
+    partial class AgregaCarpetasRequiereAutenticacion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,7 +43,7 @@ namespace Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Carpetas", (string)null);
+                    b.ToTable("Carpetas");
                 });
 
             modelBuilder.Entity("Api.Core.Entidades.Nota", b =>
@@ -70,7 +73,7 @@ namespace Api.Migrations
 
                     b.HasIndex("CarpetaId");
 
-                    b.ToTable("Notas", (string)null);
+                    b.ToTable("Notas");
                 });
 
             modelBuilder.Entity("Api.Core.Entidades.Rol", b =>
@@ -88,7 +91,7 @@ namespace Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Rol", (string)null);
+                    b.ToTable("Rol");
 
                     b.HasData(
                         new
@@ -127,7 +130,7 @@ namespace Api.Migrations
 
                     b.HasIndex("RolId");
 
-                    b.ToTable("Usuarios", (string)null);
+                    b.ToTable("Usuarios");
                 });
 
             modelBuilder.Entity("Api.Core.Entidades.Nota", b =>

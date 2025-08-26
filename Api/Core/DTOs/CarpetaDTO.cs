@@ -8,4 +8,6 @@ public class CarpetaDTO : DTO
     public required string Titulo { get; set; }
     public ICollection<NotaDTO>? Notas { get; set; }
     public int CantidadDeNotas => Notas?.Count ?? 0;
+    
+    public bool RequiereAutenticacion { get; set; }
 }
