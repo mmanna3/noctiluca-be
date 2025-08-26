@@ -13,11 +13,11 @@ public class NotaRepo : RepositorioABM<Nota>, INotaRepo
     protected override void AntesDeModificar(Nota entidadAnterior, Nota entidadNueva)
     {
         entidadNueva.CarpetaId = entidadAnterior.CarpetaId;
-        entidadNueva.FechaHora = DateTime.Now;
+        entidadNueva.FechaHoraCreacion = DateTime.Now;
     }
     
     protected override void AntesDeCrear(Nota entidad)
     {
-        entidad.FechaHora = DateTime.Now;
+        entidad.FechaHoraCreacion = DateTime.Now;
     }
 }

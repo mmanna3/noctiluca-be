@@ -10,7 +10,7 @@ public class Nota : Entidad
     
     [MaxLength(5000)]
     public string? Cuerpo { get; set; }
-    public DateTime FechaHora { get; set; }
+    public DateTime FechaHoraCreacion { get; set; }
     
     [ForeignKey("Carpeta")] 
     public required int CarpetaId { get; set; }
