@@ -20,6 +20,7 @@ public static class InyeccionDeDependenciasConfig
         
         builder.Services.AddScoped<IEscritoRepo, EscritoRepo>();
         builder.Services.AddScoped<IEscritoCore, EscritoCore>();
+        builder.Services.AddScoped<IPapeleraCore, PapeleraCore>();
         
         builder.Services.AddScoped<IAuthService, AuthCore>();
         
