@@ -36,7 +36,17 @@ public abstract class RepositorioABM<TModel> : RepositorioBase, IRepositorioABM<
     public void Modificar(TModel anterior, TModel nuevo)
     {
         AntesDeModificar(anterior, nuevo);
-        Context.Update(nuevo);
+        
+        // Si la entidad anterior no está siendo rastreada, la adjuntamos primero
+        var entry = Context.Entry(anterior);
+        if (entry.State == EntityState.Detached)
+        {
+            Context.Attach(anterior);
+        }
+        
+        // Copiamos los valores de la nueva entidad a la anterior
+        Context.Entry(anterior).CurrentValues.SetValues(nuevo);
+        
         DespuesDeModificar(anterior, nuevo);
     }
     

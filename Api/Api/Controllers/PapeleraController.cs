@@ -24,4 +24,15 @@ public class PapeleraController : ControllerBase
         var escritosEnPapelera = await _papeleraCore.ObtenerEscritosEnPapelera();
         return Ok(escritosEnPapelera);
     }
+    
+    [Authorize(Roles = "Administrador")]
+    [HttpPost("poner-en-papelera")]
+    public async Task<ActionResult> PonerEnPapelera(int id)
+    {
+        var resultado = await _papeleraCore.PonerEnPapelera(id);
+        if (!resultado)
+            return NotFound("Escrito no encontrado");
+
+        return NoContent();
+    }
 }
