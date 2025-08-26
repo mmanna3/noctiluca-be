@@ -13,6 +13,7 @@ public class EscritoRepo : RepositorioABM<Escrito>, IEscritoRepo
     protected override void AntesDeModificar(Escrito entidadAnterior, Escrito entidadNueva)
     {
         entidadNueva.CarpetaId = entidadAnterior.CarpetaId;
+        entidadNueva.FechaHoraCreacion = entidadAnterior.FechaHoraCreacion;
         entidadNueva.FechaHoraEdicion = DateTime.Now;
     }
     
