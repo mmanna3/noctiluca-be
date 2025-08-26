@@ -41,6 +41,6 @@ public class AppDbContext : DbContext
     }
     
     public DbSet<Carpeta> Carpetas { get; set; } = null!;
-    public DbSet<Nota> Notas { get; set; } = null!;
+    public DbSet<Escrito> Escritos { get; set; } = null!;
     public DbSet<Usuario> Usuarios { get; set; } = null!;
 }

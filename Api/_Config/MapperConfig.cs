@@ -11,11 +11,11 @@ public class MapperConfig : Profile
         CreateMap<Carpeta, CarpetaDTO>()
             .PreserveReferences().ReverseMap();
 
-        CreateMap<Nota, NotaDTO>()
+        CreateMap<Escrito, EscritoDTO>()
             .ForMember(dest => dest.CarpetaTitulo, x => x.MapFrom(src => src.Carpeta!.Titulo))
             .PreserveReferences();
         
-        CreateMap<NotaDTO, Nota>()
+        CreateMap<EscritoDTO, Escrito>()
             .PreserveReferences();
     }
 }

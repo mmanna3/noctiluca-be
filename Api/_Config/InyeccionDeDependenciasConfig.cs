@@ -18,8 +18,8 @@ public static class InyeccionDeDependenciasConfig
         builder.Services.AddScoped<ICarpetaRepo, CarpetaRepo>();
         builder.Services.AddScoped<ICarpetaCore, CarpetaCore>();
         
-        builder.Services.AddScoped<INotaRepo, NotaRepo>();
-        builder.Services.AddScoped<INotaCore, NotaCore>();
+        builder.Services.AddScoped<IEscritoRepo, EscritoRepo>();
+        builder.Services.AddScoped<IEscritoCore, EscritoCore>();
         
         builder.Services.AddScoped<IAuthService, AuthCore>();
         

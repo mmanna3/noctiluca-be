@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Api.Core.DTOs;
 
-public class NotaDTO : DTO
+public class EscritoDTO : DTO
 {
     [Required]
     public required string Titulo { get; set; }

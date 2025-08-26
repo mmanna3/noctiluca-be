@@ -4,19 +4,19 @@ using Api.Persistencia._Config;
 
 namespace Api.Persistencia.Repositorios;
 
-public class NotaRepo : RepositorioABM<Nota>, INotaRepo
+public class EscritoRepo : RepositorioABM<Escrito>, IEscritoRepo
 {
-    public NotaRepo(AppDbContext context) : base(context)
+    public EscritoRepo(AppDbContext context) : base(context)
     {
     }
     
-    protected override void AntesDeModificar(Nota entidadAnterior, Nota entidadNueva)
+    protected override void AntesDeModificar(Escrito entidadAnterior, Escrito entidadNueva)
     {
         entidadNueva.CarpetaId = entidadAnterior.CarpetaId;
         entidadNueva.FechaHoraEdicion = DateTime.Now;
     }
     
-    protected override void AntesDeCrear(Nota entidad)
+    protected override void AntesDeCrear(Escrito entidad)
     {
         entidad.FechaHoraCreacion = DateTime.Now;
     }

@@ -2,7 +2,7 @@ using Api.Core.Entidades;
 
 namespace Api.Core.Repositorios;
 
-public interface INotaRepo : IRepositorioABM<Nota>
+public interface IEscritoRepo : IRepositorioABM<Escrito>
 {
     
 }

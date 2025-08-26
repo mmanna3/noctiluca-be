@@ -14,7 +14,7 @@ public class CarpetaRepo : RepositorioABM<Carpeta>, ICarpetaRepo
     protected override IQueryable<Carpeta> Set()
     {
         return Context.Set<Carpeta>()
-            .Include(x => x.Notas)
+            .Include(x => x.Escritos)
             .AsQueryable();
     }
 }
