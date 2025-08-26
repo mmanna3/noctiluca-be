@@ -17,4 +17,6 @@ public class Escrito : Entidad
     [ForeignKey("Carpeta")] 
     public required int CarpetaId { get; set; }
     public virtual Carpeta? Carpeta { get; set; }
+    
+    public bool EstaEnPapelera { get; set; }
 }
