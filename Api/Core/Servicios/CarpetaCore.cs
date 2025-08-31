@@ -25,4 +25,14 @@ public class CarpetaCore : ABMCore<ICarpetaRepo, Carpeta, CarpetaDTO>, ICarpetaC
         Repo.Eliminar(carpeta);
         await BDVirtual.GuardarCambios();
     }
+    
+    public async Task ActualizarCriterioDeOrden(int carpetaId, int criterioDeOrdenId)
+    {        
+        var carpeta = await Repo.ObtenerPorIdConTracking(carpetaId);
+        if (carpeta == null)
+            throw new ExcepcionControlada("No existe la carpeta");
+        
+        carpeta.CriterioDeOrdenId = criterioDeOrdenId;
+        await BDVirtual.GuardarCambios();
+    }
 }

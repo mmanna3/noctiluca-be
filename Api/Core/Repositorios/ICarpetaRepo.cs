@@ -4,5 +4,5 @@ namespace Api.Core.Repositorios;
 
 public interface ICarpetaRepo : IRepositorioABM<Carpeta>
 {
-    
+    Task<Carpeta?> ObtenerPorIdConTracking(int id);
 }
