@@ -38,6 +38,19 @@ public class AppDbContext : DbContext
                 RolId = 1
             }
         );*/
+        
+        builder.Entity<CriterioDeOrden>().HasData(
+            new CriterioDeOrden { Id = 1, Criterio = "Creación Desc" },
+            new CriterioDeOrden { Id = 2, Criterio = "Edición Desc" },
+            new CriterioDeOrden { Id = 3, Criterio = "A-Z" },
+            new CriterioDeOrden { Id = 4, Criterio = "Creación Asc" },
+            new CriterioDeOrden { Id = 5, Criterio = "Edición Asc" },
+            new CriterioDeOrden { Id = 6, Criterio = "Z-A" }
+        );
+        
+        builder.Entity<Carpeta>()
+            .Property(u => u.CriterioDeOrdenId)
+            .HasDefaultValue(1);
     }
     
     public DbSet<Carpeta> Carpetas { get; set; } = null!;

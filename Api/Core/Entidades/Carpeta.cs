@@ -9,4 +9,7 @@ public class Carpeta : Entidad
     public virtual ICollection<Escrito> Escritos { get; set; } = null!;
     
     public bool RequiereAutenticacion { get; set; }
+    
+    public int CriterioDeOrdenId { get; set; }
+    public virtual CriterioDeOrden CriterioDeOrden { get; set; }
 }
