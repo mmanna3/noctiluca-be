@@ -12,5 +12,7 @@ public class CarpetaDTO : DTO
     
     public bool RequiereAutenticacion { get; set; }
     
+    public int Posicion { get; set; }
+    
     public CriterioDeOrdenEnum CriterioDeOrden { get; set; }
 }

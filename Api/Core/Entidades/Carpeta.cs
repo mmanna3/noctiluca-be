@@ -10,6 +10,8 @@ public class Carpeta : Entidad
     
     public bool RequiereAutenticacion { get; set; }
     
+    public int Posicion { get; set; }
+    
     public int CriterioDeOrdenId { get; set; }
     public virtual CriterioDeOrden CriterioDeOrden { get; set; } = null!;
 }
