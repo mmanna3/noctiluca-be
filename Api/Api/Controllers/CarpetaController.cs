@@ -16,5 +16,12 @@ namespace Api.Api.Controllers
             await Core.ActualizarCriterioDeOrden(id, criterioDeOrdenId);
             return Ok();
         }
+        
+        [HttpPut("actualizar-posiciones")]
+        public async Task<IActionResult> ActualizarPosiciones([FromBody] ActualizarPosicionesDTO dto)
+        {
+            await Core.ActualizarPosiciones(dto);
+            return Ok();
+        }
     }
 }
