@@ -1,0 +1,229 @@
+# Noctiluca Backend - .NET Core 8.0 Web API
+
+## Descripción del Proyecto
+Backend de Noctiluca, una PWA para gestión de documentos y escritos organizados en carpetas. API REST construida con .NET Core 8.0 siguiendo principios de Clean Architecture.
+
+## Arquitectura del Backend
+
+### Framework y Tecnologías
+- **Framework**: .NET Core 8.0 Web API
+- **Base de Datos**: Entity Framework Core con SQL Server (producción) / SQLite (desarrollo)
+- **Autenticación**: JWT Bearer Authentication
+- **Documentación**: Swagger/OpenAPI + NSwag
+- **Logging**: NLog
+- **Mapping**: AutoMapper
+- **Validación**: Data Annotations
+- **ORM**: Entity Framework Core
+
+### Estructura de Capas (Clean Architecture)
+```
+Api/
+├── Controllers/          # Controladores REST
+├── Core/                # Lógica de negocio
+│   ├── DTOs/           # Data Transfer Objects
+│   ├── Entidades/      # Modelos de dominio
+│   ├── Enums/          # Enumeraciones
+│   ├── Repositorios/   # Interfaces de repositorios
+│   └── Servicios/      # Lógica de negocio
+├── Persistencia/        # Acceso a datos
+│   ├── _Config/        # Configuración de BD
+│   ├── Migrations/     # Migraciones de EF
+│   └── Repositorios/   # Implementaciones de repositorios
+└── _Config/            # Configuración global
+```
+
+## Entidades del Dominio
+
+### Entidades Principales
+- **Usuario**: Autenticación con roles y contraseñas
+- **Carpeta**: Contenedores de escritos con criterios de orden
+- **Escrito**: Documentos con título, cuerpo y metadatos
+- **Rol**: Sistema de permisos y autorización
+- **CriterioDeOrden**: Configuración de ordenamiento de carpetas
+
+### Relaciones de Base de Datos
+- Usuario → Rol (1:N)
+- Carpeta → Escrito (1:N)
+- Carpeta → CriterioDeOrden (N:1)
+- Usuario → Carpeta (1:N) - propietario
+
+## Configuración de Desarrollo
+
+### Puertos y URLs
+- **Puerto de desarrollo**: 5072
+- **Swagger UI**: `https://localhost:5072/swagger`
+- **API Base**: `https://localhost:5072/api`
+
+### Base de Datos
+```bash
+# Docker SQL Server (desarrollo)
+docker run --cap-add SYS_PTRACE -e 'ACCEPT_EULA=1' -e 'MSSQL_SA_PASSWORD=Pas$word!39' -p 1433:1433 --name noctiluca-localhost -d mcr.microsoft.com/azure-sql-edge
+```
+
+### Comandos de Migración
+```bash
+# Agregar migración
+dotnet ef migrations add NombreMigracion
+
+# Aplicar migraciones
+dotnet ef database update
+
+# Revertir migración
+dotnet ef migrations remove
+
+# Ver migraciones pendientes
+dotnet ef migrations list
+```
+
+## Configuración de Archivos
+
+### appsettings.json
+- **Development**: Configuración local con SQLite
+- **Production**: Configuración de producción con SQL Server
+- **Logging**: Configuración NLog para diferentes niveles
+
+### CORS
+- Habilitado en desarrollo para `http://localhost:3000`
+- Configurado en `Program.cs`
+
+## Controllers y Endpoints
+
+### AuthController
+- `POST /api/auth/login` - Autenticación de usuarios
+- `POST /api/auth/cambiar-password` - Cambio de contraseña
+
+### CarpetaController
+- `GET /api/carpetas` - Listar carpetas del usuario
+- `POST /api/carpetas` - Crear nueva carpeta
+- `PUT /api/carpetas/{id}` - Actualizar carpeta
+- `DELETE /api/carpetas/{id}` - Eliminar carpeta
+- `POST /api/carpetas/actualizar-posiciones` - Reordenar carpetas
+
+### EscritoController
+- `GET /api/carpetas/{carpetaId}/escritos` - Listar escritos de una carpeta
+- `POST /api/carpetas/{carpetaId}/escritos` - Crear nuevo escrito
+- `PUT /api/escritos/{id}` - Actualizar escrito
+- `DELETE /api/escritos/{id}` - Eliminar escrito (mover a papelera)
+
+### PapeleraController
+- `GET /api/papelera` - Listar elementos en papelera
+- `POST /api/papelera/restaurar/{id}` - Restaurar elemento
+- `DELETE /api/papelera/{id}` - Eliminar permanentemente
+
+## Servicios y Lógica de Negocio
+
+### Servicios Principales
+- **AuthCore**: Manejo de autenticación y JWT
+- **CarpetaCore**: Lógica de gestión de carpetas
+- **EscritoCore**: Lógica de gestión de escritos
+- **PapeleraCore**: Lógica de papelera de reciclaje
+- **ABMCore**: Operaciones CRUD genéricas
+
+### Inyección de Dependencias
+Configurada en `_Config/InyeccionDeDependenciasConfig.cs`:
+- Repositorios
+- Servicios de negocio
+- Configuración de AutoMapper
+
+## Manejo de Errores
+
+### GlobalExceptionHandler
+- Captura excepciones no controladas
+- Retorna respuestas consistentes
+- Logging automático de errores
+
+### Excepciones Controladas
+- `ExcepcionControlada`: Para errores de negocio esperados
+- Retorna mensajes específicos al cliente
+
+## Logging y Monitoreo
+
+### NLog
+- Configurado en `nlog.config`
+- Diferentes targets: archivo, consola
+- Niveles de log configurables
+
+## Generación de Cliente API
+
+### NSwag
+- Genera cliente TypeScript para el frontend
+- Configuración en `nswag.json`
+- Script de generación: `../scripts/generar-contrato-be-en-fe.sh`
+
+## Convenciones de Código
+
+### Naming Conventions
+- **Clases**: PascalCase
+- **Propiedades**: PascalCase
+- **Métodos**: PascalCase
+- **Variables locales**: camelCase
+- **Constantes**: PascalCase
+
+### Estructura de Archivos
+- **DTOs**: Sufijo `DTO`
+- **Entidades**: Nombres descriptivos sin sufijos
+- **Repositorios**: Sufijo `Repo`
+- **Servicios**: Sufijo `Core`
+
+### Arquitectura
+- Separación clara entre capas
+- DTOs separados de entidades
+- Interfaces para todos los repositorios
+- Inyección de dependencias
+
+## Deploy y Producción
+
+### Configuración
+- Hosting en Plesk
+- Configuración WAF: Detection only
+- Base de datos SQL Server en producción
+- Logging en archivos
+
+### Variables de Entorno
+- Connection strings
+- JWT secrets
+- Logging levels
+
+## Comandos Útiles
+
+```bash
+# Ejecutar en desarrollo
+dotnet run
+
+# Build para producción
+dotnet build --configuration Release
+
+# Ejecutar tests
+dotnet test
+
+# Limpiar proyecto
+dotnet clean
+
+# Restaurar paquetes
+dotnet restore
+
+# Ver información del proyecto
+dotnet --info
+```
+
+## Dependencias Principales
+
+### NuGet Packages
+- `Microsoft.EntityFrameworkCore.SqlServer`
+- `Microsoft.EntityFrameworkCore.Sqlite`
+- `Microsoft.AspNetCore.Authentication.JwtBearer`
+- `AutoMapper`
+- `NSwag.AspNetCore`
+- `NLog.Web.AspNetCore`
+- `System.IdentityModel.Tokens.Jwt`
+
+## Notas Importantes
+
+1. **Migraciones**: Siempre crear migraciones para cambios de esquema
+2. **DTOs**: Usar DTOs para transferencia de datos, no entidades directamente
+3. **Autenticación**: JWT con refresh token implementado
+4. **CORS**: Configurado para desarrollo local
+5. **Logging**: NLog configurado para producción
+6. **Error Handling**: Global exception handler implementado
+7. **Clean Architecture**: Mantener separación de capas
+8. **Inyección de Dependencias**: Usar interfaces y DI container
