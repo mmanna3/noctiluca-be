@@ -10,7 +10,12 @@ public class MapperConfig : Profile
     {   
         CreateMap<Carpeta, CarpetaDTO>()
             .ForMember(dest => dest.CriterioDeOrden, x => x.MapFrom(src => src.CriterioDeOrdenId))
-            .PreserveReferences().ReverseMap();
+            .PreserveReferences();
+            
+        CreateMap<CarpetaDTO, Carpeta>()
+            .ForMember(dest => dest.CriterioDeOrdenId, x => x.MapFrom(src => (int)src.CriterioDeOrden))
+            .ForMember(dest => dest.CriterioDeOrden, x => x.Ignore())
+            .PreserveReferences();
 
         CreateMap<Escrito, EscritoDTO>()
             .ForMember(dest => dest.CarpetaTitulo, x => x.MapFrom(src => src.Carpeta!.Titulo))
