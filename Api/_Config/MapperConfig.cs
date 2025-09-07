@@ -22,7 +22,6 @@ public class MapperConfig : Profile
             .PreserveReferences();
         
         CreateMap<EscritoDTO, Escrito>()
-            .ForMember(dest => dest.Titulo, x => x.Ignore()) // Lo manejamos manualmente en AntesDeCrear
             .PreserveReferences();
     }
 }
