@@ -5,5 +5,5 @@ namespace Api.Core.Servicios.Interfaces;
 
 public interface IEscritoCore : ICoreABM<EscritoDTO>
 {
-    
+    Task MoverACarpeta(MoverEscritosDTO dto);
 }

@@ -27,4 +27,11 @@ public class EscritoRepo : RepositorioABM<Escrito>, IEscritoRepo
     {
         entidad.FechaHoraCreacion = DateTime.Now;
     }
+
+    public async Task<Escrito?> ObtenerPorIdConTracking(int id)
+    {
+        return await Context.Set<Escrito>()
+            .Include(x => x.Carpeta)
+            .SingleOrDefaultAsync(x => x.Id == id);
+    }
 }
