@@ -13,11 +13,15 @@ namespace Api.Core.Servicios;
 
 public class GoogleDriveCore : IGoogleDriveCore
 {
-    private readonly AppPaths _appPaths;
+    private const string IdCarpetaDestinoDrive = "1LeWUW0ZNOjq1zn1p46bnLf-kMboBhMnP";
 
-    public GoogleDriveCore(AppPaths appPaths)
+    private readonly AppPaths _appPaths;
+    private readonly IConfiguration _configuration;
+
+    public GoogleDriveCore(AppPaths appPaths, IConfiguration configuration)
     {
         _appPaths = appPaths;
+        _configuration = configuration;
     }
 
     public async Task<string> SubirArchivo(string rutaArchivoLocal, string nombreArchivoEnDrive)
@@ -28,7 +32,7 @@ public class GoogleDriveCore : IGoogleDriveCore
         var metadatos = new Google.Apis.Drive.v3.Data.File
         {
             Name = nombreArchivoEnDrive,
-            Parents = string.IsNullOrWhiteSpace(credenciales.IdCarpetaDestino) ? null : [credenciales.IdCarpetaDestino]
+            Parents = [IdCarpetaDestinoDrive]
         };
 
         await using var stream = File.OpenRead(rutaArchivoLocal);
@@ -47,17 +51,14 @@ public class GoogleDriveCore : IGoogleDriveCore
     public async Task<RotacionBackupsDriveResult> RotarBackupsEnDrive()
     {
         var credenciales = LeerCredenciales();
-        if (string.IsNullOrWhiteSpace(credenciales.IdCarpetaDestino))
-            throw new Exception("'id_carpeta_destino' está vacío en las credenciales de Google Drive.");
-
         var servicio = CrearServicio(credenciales);
 
         var listRequest = servicio.Files.List();
-        listRequest.Q = $"'{credenciales.IdCarpetaDestino}' in parents and trashed = false";
+        listRequest.Q = $"'{IdCarpetaDestinoDrive}' in parents and trashed = false";
         listRequest.Fields = "files(id, name)";
         var resultado = await listRequest.ExecuteAsync();
 
-        var archivos = resultado.Files
+        var archivos = (resultado.Files ?? [])
             .Where(f => f.Id != null && f.Name != null)
             .Select(f => (f.Id!, f.Name!))
             .ToList();
@@ -92,10 +93,22 @@ public class GoogleDriveCore : IGoogleDriveCore
 
     private CredencialesGoogleDrive LeerCredenciales()
     {
+        var desdeConfig = new CredencialesGoogleDrive
+        {
+            ClientId = _configuration["GoogleDrive:ClientId"] ?? "",
+            ClientSecret = _configuration["GoogleDrive:ClientSecret"] ?? "",
+            RefreshToken = _configuration["GoogleDrive:RefreshToken"] ?? ""
+        };
+
+        if (TieneCredencialesCompletas(desdeConfig))
+            return desdeConfig;
+
         var ruta = Path.Combine(_appPaths.BackupAbsolute(), "google-drive-credenciales.dat");
 
         if (!File.Exists(ruta))
-            throw new FileNotFoundException($"No se encontró el archivo de credenciales de Google Drive en: {ruta}");
+            throw new FileNotFoundException(
+                $"No se encontraron credenciales de Google Drive. Configurá GoogleDrive:ClientId/ClientSecret/RefreshToken en producción " +
+                $"o creá el archivo: {ruta}");
 
         var contenido = File.ReadAllText(ruta);
         var credenciales = JsonSerializer.Deserialize<CredencialesGoogleDrive>(contenido)
@@ -110,6 +123,11 @@ public class GoogleDriveCore : IGoogleDriveCore
 
         return credenciales;
     }
+
+    private static bool TieneCredencialesCompletas(CredencialesGoogleDrive credenciales) =>
+        !string.IsNullOrWhiteSpace(credenciales.ClientId)
+        && !string.IsNullOrWhiteSpace(credenciales.ClientSecret)
+        && !string.IsNullOrWhiteSpace(credenciales.RefreshToken);
 
     private static GoogleAuthorizationCodeFlow CrearFlow(CredencialesGoogleDrive credenciales) =>
         new(new GoogleAuthorizationCodeFlow.Initializer
@@ -145,8 +163,5 @@ public class GoogleDriveCore : IGoogleDriveCore
 
         [JsonPropertyName("refresh_token")]
         public string RefreshToken { get; set; } = "";
-
-        [JsonPropertyName("id_carpeta_destino")]
-        public string IdCarpetaDestino { get; set; } = "";
     }
 }

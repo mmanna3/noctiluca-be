@@ -41,6 +41,9 @@ jobs:
           $config.ConnectionStrings.Default = "Data Source=$env:DB_SERVER;Initial Catalog=$env:DB_NAME;User ID=$env:DB_USERNAME;Password=$env:DB_PASSWORD;TrustServerCertificate=True;"
           $config.AppSettings.Token = $env:CLAVE_SECRETA_JWT
           $config.AppSettings.ApiKey = $env:BACKUP_API_KEY
+          $config.GoogleDrive.ClientId = $env:GOOGLE_CLIENT_ID
+          $config.GoogleDrive.ClientSecret = $env:GOOGLE_CLIENT_SECRET
+          $config.GoogleDrive.RefreshToken = $env:GOOGLE_REFRESH_TOKEN
           $json = $config | ConvertTo-Json -Depth 10
           [System.IO.File]::WriteAllText((Resolve-Path $file), $json)
         env:
@@ -50,6 +53,9 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           CLAVE_SECRETA_JWT: ${{ secrets.CLAVE_SECRETA_JWT }}
           BACKUP_API_KEY: ${{ secrets.BACKUP_API_KEY }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
 
       - name: Publish
         run: dotnet publish Api/Api.csproj --configuration Release --framework net8.0 --self-contained true -r win-x64 -p:EnvironmentName=Production -o dist
