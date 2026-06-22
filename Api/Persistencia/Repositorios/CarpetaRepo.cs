@@ -16,39 +16,53 @@ public class CarpetaRepo : RepositorioABM<Carpeta>, ICarpetaRepo
         return Context.Set<Carpeta>()
             .Include(x => x.Escritos.Where(e => !e.EstaEnPapelera))
             .Include(x => x.CriterioDeOrden)
+            .Include(x => x.SubCarpetas)
+                .ThenInclude(sc => sc.Escritos.Where(e => !e.EstaEnPapelera))
             .AsQueryable();
     }
-    
+
+    public override async Task<IEnumerable<Carpeta>> Listar()
+    {
+        return await Set()
+            .Where(x => x.CarpetaPadreId == null)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
     public override async Task<Carpeta?> ObtenerPorId(int id)
     {
         var carpeta = await Context.Set<Carpeta>()
             .Include(x => x.CriterioDeOrden)
             .Include(x => x.Escritos.Where(e => !e.EstaEnPapelera))
+            .Include(x => x.SubCarpetas)
+                .ThenInclude(sc => sc.Escritos.Where(e => !e.EstaEnPapelera))
             .AsNoTracking()
             .SingleOrDefaultAsync(x => x.Id == id);
-            
+
         if (carpeta != null)
         {
             // Ordenar los escritos según el criterio de orden
             carpeta.Escritos = OrdenarEscritos(carpeta.Escritos, carpeta.CriterioDeOrdenId);
         }
-        
+
         return carpeta;
     }
-    
+
     public async Task<Carpeta?> ObtenerPorIdConTracking(int id)
     {
         var carpeta = await Context.Set<Carpeta>()
             .Include(x => x.CriterioDeOrden)
             .Include(x => x.Escritos.Where(e => !e.EstaEnPapelera))
+            .Include(x => x.SubCarpetas)
+                .ThenInclude(sc => sc.Escritos.Where(e => !e.EstaEnPapelera))
             .SingleOrDefaultAsync(x => x.Id == id);
-            
+
         if (carpeta != null)
         {
             // Ordenar los escritos según el criterio de orden
             carpeta.Escritos = OrdenarEscritos(carpeta.Escritos, carpeta.CriterioDeOrdenId);
         }
-        
+
         return carpeta;
     }
     

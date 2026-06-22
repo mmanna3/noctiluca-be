@@ -15,6 +15,8 @@ public class MapperConfig : Profile
         CreateMap<CarpetaDTO, Carpeta>()
             .ForMember(dest => dest.CriterioDeOrdenId, x => x.MapFrom(src => (int)src.CriterioDeOrden))
             .ForMember(dest => dest.CriterioDeOrden, x => x.Ignore())
+            .ForMember(dest => dest.CarpetaPadre, x => x.Ignore())
+            .ForMember(dest => dest.SubCarpetas, x => x.Ignore())
             .PreserveReferences();
 
         CreateMap<Escrito, EscritoDTO>()

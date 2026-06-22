@@ -51,6 +51,13 @@ public class AppDbContext : DbContext
         builder.Entity<Carpeta>()
             .Property(u => u.CriterioDeOrdenId)
             .HasDefaultValue(1);
+
+        builder.Entity<Carpeta>()
+            .HasOne(c => c.CarpetaPadre)
+            .WithMany(c => c.SubCarpetas)
+            .HasForeignKey(c => c.CarpetaPadreId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.Restrict);
     }
     
     public DbSet<Carpeta> Carpetas { get; set; } = null!;

@@ -13,15 +13,33 @@ public class CarpetaCore : ABMCore<ICarpetaRepo, Carpeta, CarpetaDTO>, ICarpetaC
     {
     }
     
+    protected override async Task<Carpeta> AntesDeCrear(CarpetaDTO dto, Carpeta entidad)
+    {
+        if (dto.CarpetaPadreId.HasValue)
+        {
+            var carpetaPadre = await Repo.ObtenerPorId(dto.CarpetaPadreId.Value);
+            if (carpetaPadre == null)
+                throw new ExcepcionControlada("No existe la carpeta padre");
+
+            if (carpetaPadre.CarpetaPadreId.HasValue)
+                throw new ExcepcionControlada("No se puede crear una carpeta dentro de una subcarpeta (máximo 2 niveles de profundidad)");
+        }
+
+        return entidad;
+    }
+
     public override async Task Eliminar(int id)
     {
         var carpeta = await Repo.ObtenerPorId(id);
         if (carpeta == null)
             throw new ExcepcionControlada("No existe la carpeta a eliminar");
-        
+
         if (carpeta.Escritos.Count != 0)
             throw new ExcepcionControlada("Para eliminar la carpeta, eliminá los escritos primero");
-        
+
+        if (carpeta.SubCarpetas.Count != 0)
+            throw new ExcepcionControlada("Para eliminar la carpeta, eliminá las subcarpetas primero");
+
         Repo.Eliminar(carpeta);
         await BDVirtual.GuardarCambios();
     }

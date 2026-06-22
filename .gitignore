@@ -44,3 +44,5 @@ msbuild.wrn
 wwwroot
 
 Api/Imagenes/
+Api/App_Data/
+Api/App_Data/google-drive-credenciales.dat

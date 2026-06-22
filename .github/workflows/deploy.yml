@@ -1,0 +1,106 @@
+name: Build, Test y Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  DOTNET_VERSION: "8.0.x"
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Inyectar configuración de producción
+        shell: pwsh
+        run: |
+          $file = "Api/appsettings.Production.json"
+          $content = Get-Content $file -Raw
+          $content = $content.Replace("{db_server}", "$env:DB_SERVER").Replace("{db_name}", "$env:DB_NAME").Replace("{db_username}", "$env:DB_USERNAME").Replace("{db_password}", "$env:DB_PASSWORD").Replace("{clave_secreta_jwt}", "$env:CLAVE_SECRETA_JWT").Replace("{api_key_backup}", "$env:BACKUP_API_KEY")
+          Set-Content -Path $file -Value $content
+        env:
+          DB_SERVER: ${{ secrets.DB_SERVER }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          CLAVE_SECRETA_JWT: ${{ secrets.CLAVE_SECRETA_JWT }}
+          BACKUP_API_KEY: ${{ secrets.BACKUP_API_KEY }}
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --configuration Release --no-build
+
+      - name: Publish
+        run: dotnet publish Api/Api.csproj --configuration Release --framework net8.0 --self-contained true -r win-x64 -p:EnvironmentName=Production -o dist
+
+      - name: Aplicar web.config de producción
+        run: cp .github/web.config dist/web.config
+
+      - name: Aplicar migraciones
+        shell: pwsh
+        run: |
+          dotnet tool install --global dotnet-ef --version 8.0.2
+          $config = Get-Content Api/appsettings.Production.json | ConvertFrom-Json
+          $connStr = $config.ConnectionStrings.Default
+          Push-Location Api; dotnet ef database update --connection $connStr; Pop-Location
+
+      - name: Deploy
+        shell: pwsh
+        run: |
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+          $msdeploy = 'C:\Program Files (x86)\IIS\Microsoft Web Deploy V3\msdeploy.exe'
+          $baseUrl = $env:DEPLOY_PUBLISH_URL.TrimEnd('/')
+          $server = "$baseUrl/MsDeploy.axd?site=$env:MS_DEPLOY_SITE"
+          $sourcePath = Join-Path $env:GITHUB_WORKSPACE 'dist'
+          $siteName = $env:MS_DEPLOY_SITE
+          $destBase = "contentPath=$siteName,computerName=$server,username=$env:DEPLOY_USERNAME,password=$env:DEPLOY_PASSWORD,AuthType='Basic'"
+          $destOffline = "contentPath=$siteName/app_offline.htm,computerName=$server,username=$env:DEPLOY_USERNAME,password=$env:DEPLOY_PASSWORD,AuthType='Basic',IncludeAcls=False"
+          $skipDirs = @('App_Data', 'Imagenes', 'logs', 'aspnet_client', 'wwwroot', '.well-known')
+          $skipArgs = $skipDirs | ForEach-Object { "-skip:Directory=$_" }
+
+          function Remove-AppOffline {
+            & $msdeploy -verb:delete -allowUntrusted "-dest:$destOffline"
+          }
+
+          $offlineFile = Join-Path $env:GITHUB_WORKSPACE 'app_offline.htm'
+          '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Maintenance</title></head><body><h1>Actualizando...</h1></body></html>' | Set-Content -Path $offlineFile -Encoding utf8NoBOM
+
+          Write-Host 'Paso 1/3: app_offline.htm (apagar app)...'
+          & $msdeploy -verb:sync -allowUntrusted "-source:contentPath=$offlineFile" "-dest:$destOffline"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          Write-Host 'Esperando 30s a que IIS libere Api.dll...'
+          Start-Sleep -Seconds 30
+
+          $deployExit = 0
+          try {
+            Write-Host 'Paso 2/3: deploy completo...'
+            & $msdeploy -verb:sync -allowUntrusted "-source:contentPath=$sourcePath" "-dest:$destBase" -enableRule:AppOffline -retryAttempts:20 -retryInterval:10000 -verbose @skipArgs
+            $deployExit = $LASTEXITCODE
+          }
+          finally {
+            Write-Host 'Paso 3/3: quitando app_offline.htm...'
+            Remove-AppOffline | Out-Null
+          }
+
+          if ($deployExit -ne 0) { exit $deployExit }
+        env:
+          DEPLOY_PUBLISH_URL: ${{ secrets.DEPLOY_PUBLISH_URL }}
+          MS_DEPLOY_SITE: ${{ secrets.MS_DEPLOY_SITE }}
+          DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME }}
+          DEPLOY_PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}

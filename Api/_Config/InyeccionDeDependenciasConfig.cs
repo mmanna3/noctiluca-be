@@ -1,3 +1,4 @@
+using Api.Core.Logica;
 using Api.Core.Repositorios;
 using Api.Core.Servicios;
 using Api.Core.Servicios.Interfaces;
@@ -23,6 +24,10 @@ public static class InyeccionDeDependenciasConfig
         builder.Services.AddScoped<IPapeleraCore, PapeleraCore>();
         
         builder.Services.AddScoped<IAuthService, AuthCore>();
+
+        builder.Services.AddScoped<AppPaths, AppPathsWebApp>();
+        builder.Services.AddScoped<IBackupCore, BackupCore>();
+        builder.Services.AddScoped<IGoogleDriveCore, GoogleDriveCore>();
         
         // Configurar la autenticación JWT
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
