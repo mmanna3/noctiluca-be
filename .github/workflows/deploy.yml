@@ -21,21 +21,6 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Inyectar configuración de producción
-        shell: pwsh
-        run: |
-          $file = "Api/appsettings.Production.json"
-          $content = Get-Content $file -Raw
-          $content = $content.Replace("{db_server}", "$env:DB_SERVER").Replace("{db_name}", "$env:DB_NAME").Replace("{db_username}", "$env:DB_USERNAME").Replace("{db_password}", "$env:DB_PASSWORD").Replace("{clave_secreta_jwt}", "$env:CLAVE_SECRETA_JWT").Replace("{api_key_backup}", "$env:BACKUP_API_KEY")
-          Set-Content -Path $file -Value $content
-        env:
-          DB_SERVER: ${{ secrets.DB_SERVER }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          CLAVE_SECRETA_JWT: ${{ secrets.CLAVE_SECRETA_JWT }}
-          BACKUP_API_KEY: ${{ secrets.BACKUP_API_KEY }}
-
       - name: Restore
         run: dotnet restore
 
@@ -44,6 +29,27 @@ jobs:
 
       - name: Test
         run: dotnet test --configuration Release --no-build
+        env:
+          ASPNETCORE_ENVIRONMENT: Development
+          DOTNET_ENVIRONMENT: Development
+
+      - name: Inyectar configuración de producción
+        shell: pwsh
+        run: |
+          $file = "Api/appsettings.Production.json"
+          $config = Get-Content $file -Raw | ConvertFrom-Json
+          $config.ConnectionStrings.Default = "Data Source=$env:DB_SERVER;Initial Catalog=$env:DB_NAME;User ID=$env:DB_USERNAME;Password=$env:DB_PASSWORD;TrustServerCertificate=True;"
+          $config.AppSettings.Token = $env:CLAVE_SECRETA_JWT
+          $config.AppSettings.ApiKey = $env:BACKUP_API_KEY
+          $json = $config | ConvertTo-Json -Depth 10
+          [System.IO.File]::WriteAllText((Resolve-Path $file), $json)
+        env:
+          DB_SERVER: ${{ secrets.DB_SERVER }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          CLAVE_SECRETA_JWT: ${{ secrets.CLAVE_SECRETA_JWT }}
+          BACKUP_API_KEY: ${{ secrets.BACKUP_API_KEY }}
 
       - name: Publish
         run: dotnet publish Api/Api.csproj --configuration Release --framework net8.0 --self-contained true -r win-x64 -p:EnvironmentName=Production -o dist

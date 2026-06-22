@@ -11,6 +11,12 @@ public class NoctilucaWebApplicationFactory : WebApplicationFactory<Program>
 {
     private readonly string _dbName = "TestDb_" + Guid.NewGuid();
 
+    public NoctilucaWebApplicationFactory()
+    {
+        Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
+        Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", "Development");
+    }
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureServices(services =>
