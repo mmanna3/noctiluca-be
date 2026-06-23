@@ -34,4 +34,16 @@ public class EscritoRepo : RepositorioABM<Escrito>, IEscritoRepo
             .Include(x => x.Carpeta)
             .SingleOrDefaultAsync(x => x.Id == id);
     }
+
+    public async Task<IEnumerable<Escrito>> BuscarPorTexto(string texto)
+    {
+        return await Context.Set<Escrito>()
+            .Include(x => x.Carpeta)
+            .AsNoTracking()
+            .Where(e => !e.EstaEnPapelera
+                && (EF.Functions.Like(e.Titulo, $"%{texto}%")
+                    || (e.Cuerpo != null && EF.Functions.Like(e.Cuerpo, $"%{texto}%"))))
+            .OrderByDescending(e => e.FechaHoraEdicion ?? e.FechaHoraCreacion)
+            .ToListAsync();
+    }
 }

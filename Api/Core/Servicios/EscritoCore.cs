@@ -53,4 +53,10 @@ public class EscritoCore : ABMCore<IEscritoRepo, Escrito, EscritoDTO>, IEscritoC
 
         await BDVirtual.GuardarCambios();
     }
+
+    public async Task<IEnumerable<EscritoDTO>> Buscar(string texto)
+    {
+        var entidades = await Repo.BuscarPorTexto(texto);
+        return Mapper.Map<List<EscritoDTO>>(entidades);
+    }
 }
