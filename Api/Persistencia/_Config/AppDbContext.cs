@@ -58,9 +58,21 @@ public class AppDbContext : DbContext
             .HasForeignKey(c => c.CarpetaPadreId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<RegistroHabito>()
+            .HasOne(r => r.Habito)
+            .WithMany(h => h.Registros)
+            .HasForeignKey(r => r.HabitoId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<RegistroHabito>()
+            .HasIndex(r => new { r.HabitoId, r.Fecha })
+            .IsUnique();
     }
     
     public DbSet<Carpeta> Carpetas { get; set; } = null!;
     public DbSet<Escrito> Escritos { get; set; } = null!;
     public DbSet<Usuario> Usuarios { get; set; } = null!;
+    public DbSet<Habito> Habitos { get; set; } = null!;
+    public DbSet<RegistroHabito> RegistrosHabito { get; set; } = null!;
 }

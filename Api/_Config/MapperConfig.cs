@@ -25,5 +25,20 @@ public class MapperConfig : Profile
         
         CreateMap<EscritoDTO, Escrito>()
             .PreserveReferences();
+
+        CreateMap<Habito, HabitoDTO>()
+            .ForMember(dest => dest.CantidadRegistros, x => x.Ignore())
+            .PreserveReferences();
+
+        CreateMap<HabitoDTO, Habito>()
+            .ForMember(dest => dest.Registros, x => x.Ignore())
+            .PreserveReferences();
+
+        CreateMap<RegistroHabito, RegistroHabitoDTO>()
+            .PreserveReferences();
+
+        CreateMap<RegistroHabitoDTO, RegistroHabito>()
+            .ForMember(dest => dest.Habito, x => x.Ignore())
+            .PreserveReferences();
     }
 }
