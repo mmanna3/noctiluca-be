@@ -156,4 +156,70 @@ public class EscritosTests : IClassFixture<NoctilucaWebApplicationFactory>
         var modificado = await db.Escritos.AsNoTracking().SingleAsync(e => e.Id == escrito.Id);
         Assert.Equal(tituloNuevo, modificado.Titulo);
     }
+
+    [Fact]
+    public async Task BuscarEscritos_PorTextoEnTitulo_OK()
+    {
+        var carpeta = await CrearCarpetaEnDB();
+        var textoUnico = Guid.NewGuid().ToString("N")[..8];
+        await CrearEscritoEnDB(carpeta.Id, $"Nota con {textoUnico} en titulo");
+        await CrearEscritoEnDB(carpeta.Id, "Otra nota sin coincidencia");
+
+        var response = await _client.GetAsync($"/api/Escrito/buscar?texto={textoUnico}");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var resultados = await response.Content.ReadFromJsonAsync<List<EscritoDTO>>();
+        Assert.NotNull(resultados);
+        Assert.Single(resultados);
+        Assert.Contains(textoUnico, resultados[0].Titulo);
+    }
+
+    [Fact]
+    public async Task BuscarEscritos_PorTextoEnCuerpo_OK()
+    {
+        var carpeta = await CrearCarpetaEnDB();
+        var textoUnico = Guid.NewGuid().ToString("N")[..8];
+        var escrito = await CrearEscritoEnDB(carpeta.Id, "Titulo generico");
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var enDb = await db.Escritos.SingleAsync(e => e.Id == escrito.Id);
+            enDb.Cuerpo = $"Contenido con {textoUnico} adentro";
+            await db.SaveChangesAsync();
+        }
+
+        var response = await _client.GetAsync($"/api/Escrito/buscar?texto={textoUnico}");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var resultados = await response.Content.ReadFromJsonAsync<List<EscritoDTO>>();
+        Assert.NotNull(resultados);
+        Assert.Single(resultados);
+        Assert.Contains(textoUnico, resultados[0].Cuerpo);
+    }
+
+    [Fact]
+    public async Task BuscarEscritos_MenosDeTresCaracteres_BadRequest()
+    {
+        var response = await _client.GetAsync("/api/Escrito/buscar?texto=ab");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task BuscarEscritos_NoIncluyePapelera()
+    {
+        var carpeta = await CrearCarpetaEnDB();
+        var textoUnico = Guid.NewGuid().ToString("N")[..8];
+        var escrito = await CrearEscritoEnDB(carpeta.Id, $"Papelera {textoUnico}");
+
+        await _client.PostAsync($"/api/Papelera/poner-en-papelera?id={escrito.Id}", null);
+
+        var response = await _client.GetAsync($"/api/Escrito/buscar?texto={textoUnico}");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var resultados = await response.Content.ReadFromJsonAsync<List<EscritoDTO>>();
+        Assert.NotNull(resultados);
+        Assert.Empty(resultados);
+    }
 }
