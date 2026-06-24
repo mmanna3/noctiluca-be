@@ -68,6 +68,16 @@ public class AppDbContext : DbContext
         builder.Entity<RegistroHabito>()
             .HasIndex(r => new { r.HabitoId, r.Fecha })
             .IsUnique();
+
+        builder.Entity<ListaObjetivo>()
+            .HasIndex(l => new { l.Tipo, l.ClavePeriodo })
+            .IsUnique();
+
+        builder.Entity<ItemObjetivo>()
+            .HasOne(i => i.ListaObjetivo)
+            .WithMany(l => l.Items)
+            .HasForeignKey(i => i.ListaObjetivoId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
     
     public DbSet<Carpeta> Carpetas { get; set; } = null!;
@@ -75,4 +85,6 @@ public class AppDbContext : DbContext
     public DbSet<Usuario> Usuarios { get; set; } = null!;
     public DbSet<Habito> Habitos { get; set; } = null!;
     public DbSet<RegistroHabito> RegistrosHabito { get; set; } = null!;
+    public DbSet<ListaObjetivo> ListasObjetivo { get; set; } = null!;
+    public DbSet<ItemObjetivo> ItemsObjetivo { get; set; } = null!;
 }

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Api.Core.Enums;
 
 namespace Api.Core.Entidades;
 
@@ -18,4 +19,8 @@ public class Carpeta : Entidad
     public int? CarpetaPadreId { get; set; }
     public virtual Carpeta? CarpetaPadre { get; set; }
     public virtual ICollection<Carpeta> SubCarpetas { get; set; } = new List<Carpeta>();
+
+    public bool EsSistema { get; set; }
+
+    public PropositoCarpetaEnum? PropositoCarpeta { get; set; }
 }

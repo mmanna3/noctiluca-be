@@ -25,6 +25,9 @@ public class CarpetaRepo : RepositorioABM<Carpeta>, ICarpetaRepo
     {
         return await Set()
             .Where(x => x.CarpetaPadreId == null)
+            .OrderByDescending(x => x.EsSistema)
+            .ThenBy(x => x.Posicion)
+            .ThenBy(x => x.Id)
             .AsNoTracking()
             .ToListAsync();
     }

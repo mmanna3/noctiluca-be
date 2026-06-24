@@ -26,6 +26,10 @@ public static class InyeccionDeDependenciasConfig
         builder.Services.AddScoped<IHabitoRepo, HabitoRepo>();
         builder.Services.AddScoped<IRegistroHabitoRepo, RegistroHabitoRepo>();
         builder.Services.AddScoped<IHabitoCore, HabitoCore>();
+
+        builder.Services.AddScoped<IListaObjetivoRepo, ListaObjetivoRepo>();
+        builder.Services.AddScoped<IItemObjetivoRepo, ItemObjetivoRepo>();
+        builder.Services.AddScoped<IObjetivoCore, ObjetivoCore>();
         
         builder.Services.AddScoped<IAuthService, AuthCore>();
 

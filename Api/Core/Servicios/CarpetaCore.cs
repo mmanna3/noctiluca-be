@@ -12,6 +12,16 @@ public class CarpetaCore : ABMCore<ICarpetaRepo, Carpeta, CarpetaDTO>, ICarpetaC
     public CarpetaCore(IBDVirtual bd, ICarpetaRepo repo, IMapper mapper) : base(bd, repo, mapper)
     {
     }
+
+    protected override Task<Carpeta> AntesDeModificar(
+        int id,
+        CarpetaDTO dto,
+        Carpeta entidadAnterior,
+        Carpeta entidadNueva)
+    {
+        ValidarCarpetaSistema(entidadAnterior, "modificar");
+        return Task.FromResult(entidadNueva);
+    }
     
     protected override async Task<Carpeta> AntesDeCrear(CarpetaDTO dto, Carpeta entidad)
     {
@@ -33,6 +43,8 @@ public class CarpetaCore : ABMCore<ICarpetaRepo, Carpeta, CarpetaDTO>, ICarpetaC
         var carpeta = await Repo.ObtenerPorId(id);
         if (carpeta == null)
             throw new ExcepcionControlada("No existe la carpeta a eliminar");
+
+        ValidarCarpetaSistema(carpeta, "eliminar");
 
         if (carpeta.Escritos.Count != 0)
             throw new ExcepcionControlada("Para eliminar la carpeta, eliminá los escritos primero");
@@ -61,10 +73,19 @@ public class CarpetaCore : ABMCore<ICarpetaRepo, Carpeta, CarpetaDTO>, ICarpetaC
             var carpeta = await Repo.ObtenerPorIdConTracking(posicionCarpeta.IdDeCarpeta);
             if (carpeta == null)
                 throw new ExcepcionControlada($"No existe la carpeta con ID {posicionCarpeta.IdDeCarpeta}");
+
+            if (carpeta.EsSistema)
+                throw new ExcepcionControlada("No se puede reordenar una carpeta del sistema");
             
             carpeta.Posicion = posicionCarpeta.Posicion;
         }
         
         await BDVirtual.GuardarCambios();
+    }
+
+    private static void ValidarCarpetaSistema(Carpeta carpeta, string accion)
+    {
+        if (carpeta.EsSistema)
+            throw new ExcepcionControlada($"No se puede {accion} una carpeta del sistema");
     }
 }

@@ -19,4 +19,8 @@ public class CarpetaDTO : DTO
     public int? CarpetaPadreId { get; set; }
     public ICollection<CarpetaDTO>? SubCarpetas { get; set; }
     public int CantidadDeSubCarpetas => SubCarpetas?.Count ?? 0;
+
+    public bool EsSistema { get; set; }
+
+    public PropositoCarpetaEnum? PropositoCarpeta { get; set; }
 }
