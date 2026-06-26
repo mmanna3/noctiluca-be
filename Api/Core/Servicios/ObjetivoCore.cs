@@ -82,16 +82,25 @@ public class ObjetivoCore : IObjetivoCore
 
     public async Task<ItemObjetivoDTO> CrearItem(CrearItemObjetivoDTO dto)
     {
-        ValidarTexto(dto.Texto);
+        var texto = dto.Texto?.Trim() ?? "";
+        if (!string.IsNullOrEmpty(texto))
+            ValidarTexto(texto);
 
         var lista = await ResolverListaParaItem(dto);
         var posicion = lista.Items.Any() ? lista.Items.Max(i => i.Posicion) + 1 : 0;
+
+        if (dto.Posicion.HasValue)
+        {
+            posicion = dto.Posicion.Value;
+            foreach (var existente in lista.Items.Where(i => i.Posicion >= posicion))
+                existente.Posicion++;
+        }
 
         var item = new ItemObjetivo
         {
             Id = 0,
             ListaObjetivoId = lista.Id,
-            Texto = dto.Texto.Trim(),
+            Texto = texto,
             Completado = false,
             Posicion = posicion,
         };
@@ -136,6 +145,20 @@ public class ObjetivoCore : IObjetivoCore
             throw new ExcepcionControlada("No existe el ítem");
 
         _itemRepo.Eliminar(item);
+        await _bd.GuardarCambios();
+    }
+
+    public async Task ActualizarPosicionesItem(ActualizarPosicionesItemObjetivoDTO dto)
+    {
+        foreach (var posicionItem in dto.Posiciones)
+        {
+            var item = await _itemRepo.ObtenerPorIdConTracking(posicionItem.IdDeItem);
+            if (item == null)
+                throw new ExcepcionControlada($"No existe el ítem con ID {posicionItem.IdDeItem}");
+
+            item.Posicion = posicionItem.Posicion;
+        }
+
         await _bd.GuardarCambios();
     }
 

@@ -13,4 +13,6 @@ public class CrearItemObjetivoDTO
 
     [Required, MaxLength(200)]
     public required string Texto { get; set; }
+
+    public int? Posicion { get; set; }
 }

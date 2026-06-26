@@ -74,9 +74,6 @@ public class CarpetaCore : ABMCore<ICarpetaRepo, Carpeta, CarpetaDTO>, ICarpetaC
             if (carpeta == null)
                 throw new ExcepcionControlada($"No existe la carpeta con ID {posicionCarpeta.IdDeCarpeta}");
 
-            if (carpeta.EsSistema)
-                throw new ExcepcionControlada("No se puede reordenar una carpeta del sistema");
-            
             carpeta.Posicion = posicionCarpeta.Posicion;
         }
         

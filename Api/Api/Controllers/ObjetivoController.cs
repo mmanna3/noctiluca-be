@@ -89,4 +89,13 @@ public class ObjetivoController : ControllerBase
         await _core.EliminarItem(id);
         return Ok();
     }
+
+    [HttpPut("item/posiciones")]
+    [Authorize(Roles = "Administrador,Consulta")]
+    public async Task<IActionResult> ActualizarPosicionesItem(
+        [FromBody] ActualizarPosicionesItemObjetivoDTO dto)
+    {
+        await _core.ActualizarPosicionesItem(dto);
+        return Ok();
+    }
 }

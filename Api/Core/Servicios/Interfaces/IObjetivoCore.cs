@@ -16,4 +16,5 @@ public interface IObjetivoCore
     Task<ItemObjetivoDTO> EditarItem(int id, EditarItemObjetivoDTO dto);
     Task<ItemObjetivoDTO> ToggleCompletado(int id);
     Task EliminarItem(int id);
+    Task ActualizarPosicionesItem(ActualizarPosicionesItemObjetivoDTO dto);
 }
