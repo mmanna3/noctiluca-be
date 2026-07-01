@@ -3,6 +3,7 @@ using Api.Core.DTOs;
 using Api.Core.DTOs.Sync;
 using Api.Core.Entidades;
 using Api.Core.Enums;
+using Api.Core.Otros;
 using Api.Core.Servicios.Interfaces;
 using Api.Persistencia._Config;
 using AutoMapper;
@@ -36,6 +37,28 @@ public class SyncCore : ISyncCore
             .OrderBy(e => e.Version)
             .ToListAsync();
 
+        var habitos = await _db.Habitos.AsNoTracking()
+            .Where(h => h.Version > desde)
+            .OrderBy(h => h.Version)
+            .ToListAsync();
+
+        var registros = await _db.RegistrosHabito.AsNoTracking()
+            .Include(r => r.Habito)
+            .Where(r => r.Version > desde)
+            .OrderBy(r => r.Version)
+            .ToListAsync();
+
+        var listas = await _db.ListasObjetivo.AsNoTracking()
+            .Where(l => l.Version > desde)
+            .OrderBy(l => l.Version)
+            .ToListAsync();
+
+        var items = await _db.ItemsObjetivo.AsNoTracking()
+            .Include(i => i.ListaObjetivo)
+            .Where(i => i.Version > desde)
+            .OrderBy(i => i.Version)
+            .ToListAsync();
+
         var tombstones = await _db.Tombstones.AsNoTracking()
             .Where(t => t.Version > desde)
             .OrderBy(t => t.Version)
@@ -44,6 +67,10 @@ public class SyncCore : ISyncCore
         var cursor = desde;
         if (carpetas.Count > 0) cursor = Math.Max(cursor, carpetas.Max(c => c.Version));
         if (escritos.Count > 0) cursor = Math.Max(cursor, escritos.Max(e => e.Version));
+        if (habitos.Count > 0) cursor = Math.Max(cursor, habitos.Max(h => h.Version));
+        if (registros.Count > 0) cursor = Math.Max(cursor, registros.Max(r => r.Version));
+        if (listas.Count > 0) cursor = Math.Max(cursor, listas.Max(l => l.Version));
+        if (items.Count > 0) cursor = Math.Max(cursor, items.Max(i => i.Version));
         if (tombstones.Count > 0) cursor = Math.Max(cursor, tombstones.Max(t => t.Version));
 
         return new SyncPullDTO
@@ -52,6 +79,21 @@ public class SyncCore : ISyncCore
             HayMas = false,
             Carpetas = _mapper.Map<List<CarpetaDTO>>(carpetas),
             Escritos = _mapper.Map<List<EscritoDTO>>(escritos),
+            Habitos = _mapper.Map<List<HabitoDTO>>(habitos),
+            RegistrosHabito = registros.Select(r =>
+            {
+                var dto = _mapper.Map<RegistroHabitoDTO>(r);
+                dto.HabitoClientId = r.Habito?.ClientId;
+                return dto;
+            }).ToList(),
+            ListasObjetivo = _mapper.Map<List<ListaObjetivoDTO>>(listas),
+            ItemsObjetivo = items.Select(i =>
+            {
+                var dto = _mapper.Map<ItemObjetivoDTO>(i);
+                dto.ListaTipo = i.ListaObjetivo?.Tipo;
+                dto.ListaClavePeriodo = i.ListaObjetivo?.ClavePeriodo;
+                return dto;
+            }).ToList(),
             Eliminados = tombstones.Select(t => new TombstoneDTO
             {
                 TipoEntidad = t.TipoEntidad,
@@ -82,8 +124,8 @@ public class SyncCore : ISyncCore
 
     /// <summary>
     /// Orden causal dentro del lote: primero altas de carpetas (raíces antes que
-    /// subcarpetas), después escritos (pueden referenciar carpetas recién creadas)
-    /// y por último las bajas.
+    /// subcarpetas) y hábitos, después escritos, ítems de objetivo y registros de
+    /// hábito (que dependen de que su hábito exista) y por último las bajas.
     /// </summary>
     private static IEnumerable<SyncOpDTO> OrdenarPorDependencias(IEnumerable<SyncOpDTO> ops)
     {
@@ -91,13 +133,15 @@ public class SyncCore : ISyncCore
 
         int Rango(SyncOpDTO op)
         {
-            if (op.Operation == "delete") return 3;
+            if (op.Operation == "delete") return 9;
             if (op.EntityType == "carpeta")
             {
                 var payload = DeserializarCarpeta(op);
                 return payload?.CarpetaPadreClientId == null ? 0 : 1;
             }
-            return 2; // escrito upsert
+            if (op.EntityType == "habito") return 1;
+            if (op.EntityType == "registroHabito") return 3;
+            return 2; // escrito / itemObjetivo upsert
         }
 
         return lista.OrderBy(Rango);
@@ -117,6 +161,9 @@ public class SyncCore : ISyncCore
             {
                 ("carpeta", "upsert") => await UpsertCarpeta(op),
                 ("escrito", "upsert") => await UpsertEscrito(op),
+                ("habito", "upsert") => await UpsertHabito(op),
+                ("itemObjetivo", "upsert") => await UpsertItemObjetivo(op),
+                ("registroHabito", "upsert") => await UpsertRegistroHabito(op),
                 (_, "delete") => await Eliminar(op),
                 _ => Error(op, $"Operación no soportada: {op.EntityType}/{op.Operation}"),
             };
@@ -220,6 +267,146 @@ public class SyncCore : ISyncCore
         return Aplicado(op, existente.Id, existente.Version);
     }
 
+    private async Task<SyncOpResultDTO> UpsertHabito(SyncOpDTO op)
+    {
+        var payload = op.Payload?.Deserialize<HabitoSyncPayload>(JsonOpts)
+            ?? throw new InvalidOperationException("Payload de hábito inválido");
+
+        var existente = await _db.Habitos.FirstOrDefaultAsync(h => h.ClientId == op.ClientEntityId);
+
+        if (existente == null)
+        {
+            var nuevo = new Habito
+            {
+                Id = 0,
+                ClientId = op.ClientEntityId,
+                Nombre = payload.Nombre,
+                Tipo = (TipoHabitoEnum)payload.Tipo,
+                Activo = payload.Activo,
+                Posicion = payload.Posicion,
+                MetaMinutos = payload.MetaMinutos,
+            };
+            _db.Habitos.Add(nuevo);
+            await _db.SaveChangesAsync();
+            return Aplicado(op, nuevo.Id, nuevo.Version);
+        }
+
+        if (HayConflictoYPierdeElCliente(op, existente))
+            return Rechazado(op, existente.Id, existente.Version);
+
+        existente.Nombre = payload.Nombre;
+        existente.Tipo = (TipoHabitoEnum)payload.Tipo;
+        existente.Activo = payload.Activo;
+        existente.Posicion = payload.Posicion;
+        existente.MetaMinutos = payload.MetaMinutos;
+        await _db.SaveChangesAsync();
+        return Aplicado(op, existente.Id, existente.Version);
+    }
+
+    private async Task<SyncOpResultDTO> UpsertItemObjetivo(SyncOpDTO op)
+    {
+        var payload = op.Payload?.Deserialize<ItemObjetivoSyncPayload>(JsonOpts)
+            ?? throw new InvalidOperationException("Payload de ítem de objetivo inválido");
+
+        var lista = await ObtenerOCrearLista((TipoListaObjetivoEnum)payload.ListaTipo, payload.ListaClavePeriodo);
+
+        var existente = await _db.ItemsObjetivo.FirstOrDefaultAsync(i => i.ClientId == op.ClientEntityId);
+
+        if (existente == null)
+        {
+            var nuevo = new ItemObjetivo
+            {
+                Id = 0,
+                ClientId = op.ClientEntityId,
+                ListaObjetivoId = lista.Id,
+                Texto = payload.Texto,
+                Completado = payload.Completado,
+                Posicion = payload.Posicion,
+                FechaCompletado = payload.FechaCompletado,
+            };
+            _db.ItemsObjetivo.Add(nuevo);
+            await _db.SaveChangesAsync();
+            return Aplicado(op, nuevo.Id, nuevo.Version);
+        }
+
+        if (HayConflictoYPierdeElCliente(op, existente))
+            return Rechazado(op, existente.Id, existente.Version);
+
+        existente.Texto = payload.Texto;
+        existente.Completado = payload.Completado;
+        existente.Posicion = payload.Posicion;
+        existente.FechaCompletado = payload.FechaCompletado;
+        existente.ListaObjetivoId = lista.Id;
+        await _db.SaveChangesAsync();
+        return Aplicado(op, existente.Id, existente.Version);
+    }
+
+    private async Task<SyncOpResultDTO> UpsertRegistroHabito(SyncOpDTO op)
+    {
+        var payload = op.Payload?.Deserialize<RegistroHabitoSyncPayload>(JsonOpts)
+            ?? throw new InvalidOperationException("Payload de registro de hábito inválido");
+
+        var habito = await _db.Habitos.FirstOrDefaultAsync(h => h.ClientId == payload.HabitoClientId);
+        if (habito == null)
+            return Error(op, "No se encontró el hábito del registro");
+
+        var fecha = payload.Fecha.Date;
+        // Clave natural (HabitoId, Fecha): un registro por hábito y día.
+        var existente = await _db.RegistrosHabito
+            .FirstOrDefaultAsync(r => r.HabitoId == habito.Id && r.Fecha == fecha);
+
+        if (existente == null)
+        {
+            var nuevo = new RegistroHabito
+            {
+                Id = 0,
+                ClientId = op.ClientEntityId,
+                HabitoId = habito.Id,
+                Fecha = fecha,
+                ValorBooleano = payload.ValorBooleano,
+                ValorNumerico = payload.ValorNumerico,
+            };
+            _db.RegistrosHabito.Add(nuevo);
+            await _db.SaveChangesAsync();
+            return Aplicado(op, nuevo.Id, nuevo.Version);
+        }
+
+        if (HayConflictoYPierdeElCliente(op, existente))
+            return Rechazado(op, existente.Id, existente.Version);
+
+        existente.ValorBooleano = payload.ValorBooleano;
+        existente.ValorNumerico = payload.ValorNumerico;
+        await _db.SaveChangesAsync();
+        return Aplicado(op, existente.Id, existente.Version);
+    }
+
+    /// <summary>
+    /// Resuelve la lista de objetivos por su clave natural (tipo + período); la crea
+    /// si todavía no existe. Es idempotente: el índice único (Tipo, ClavePeriodo)
+    /// garantiza una sola lista por período aunque varios ítems lleguen juntos.
+    /// </summary>
+    private async Task<ListaObjetivo> ObtenerOCrearLista(TipoListaObjetivoEnum tipo, string clavePeriodo)
+    {
+        var existente = await _db.ListasObjetivo
+            .FirstOrDefaultAsync(l => l.Tipo == tipo && l.ClavePeriodo == clavePeriodo);
+        if (existente != null)
+            return existente;
+
+        var (inicio, fin) = ObjetivoPeriodoUtil.ObtenerRangoDesdeClave(tipo, clavePeriodo);
+        var nueva = new ListaObjetivo
+        {
+            Id = 0,
+            Tipo = tipo,
+            ClavePeriodo = clavePeriodo,
+            FechaInicio = inicio,
+            FechaFin = fin,
+            FechaCreacion = DateTime.Now,
+        };
+        _db.ListasObjetivo.Add(nueva);
+        await _db.SaveChangesAsync();
+        return nueva;
+    }
+
     private async Task<SyncOpResultDTO> Eliminar(SyncOpDTO op)
     {
         switch (op.EntityType)
@@ -241,6 +428,24 @@ public class SyncCore : ISyncCore
                     await _db.SaveChangesAsync();
                 }
                 return Aplicado(op, escrito?.Id, null);
+
+            case "itemObjetivo":
+                var item = await _db.ItemsObjetivo.FirstOrDefaultAsync(i => i.ClientId == op.ClientEntityId);
+                if (item != null)
+                {
+                    _db.ItemsObjetivo.Remove(item);
+                    await _db.SaveChangesAsync();
+                }
+                return Aplicado(op, item?.Id, null);
+
+            case "habito":
+                var habito = await _db.Habitos.FirstOrDefaultAsync(h => h.ClientId == op.ClientEntityId);
+                if (habito != null)
+                {
+                    _db.Habitos.Remove(habito);
+                    await _db.SaveChangesAsync();
+                }
+                return Aplicado(op, habito?.Id, null);
 
             default:
                 return Error(op, $"Tipo no soportado para delete: {op.EntityType}");

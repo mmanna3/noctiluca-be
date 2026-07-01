@@ -36,6 +36,7 @@ public class MapperConfig : Profile
             .PreserveReferences();
 
         CreateMap<RegistroHabito, RegistroHabitoDTO>()
+            .ForMember(dest => dest.HabitoClientId, x => x.Ignore())
             .PreserveReferences();
 
         CreateMap<RegistroHabitoDTO, RegistroHabito>()
@@ -48,6 +49,8 @@ public class MapperConfig : Profile
             .PreserveReferences();
 
         CreateMap<ItemObjetivo, ItemObjetivoDTO>()
+            .ForMember(dest => dest.ListaTipo, x => x.Ignore())
+            .ForMember(dest => dest.ListaClavePeriodo, x => x.Ignore())
             .PreserveReferences();
     }
 }

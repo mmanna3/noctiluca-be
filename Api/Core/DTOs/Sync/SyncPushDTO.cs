@@ -55,3 +55,32 @@ public class EscritoSyncPayload
     public bool EstaEnPapelera { get; set; }
     public DateTime? FechaHoraCreacion { get; set; }
 }
+
+public class HabitoSyncPayload
+{
+    public string Nombre { get; set; } = "";
+    public int Tipo { get; set; }
+    public bool Activo { get; set; } = true;
+    public int Posicion { get; set; }
+    public int? MetaMinutos { get; set; }
+}
+
+public class ItemObjetivoSyncPayload
+{
+    public string Texto { get; set; } = "";
+    public bool Completado { get; set; }
+    public int Posicion { get; set; }
+    public DateTime? FechaCompletado { get; set; }
+
+    /// <summary>Identifica (o crea) la lista dueña por su clave natural (tipo + período).</summary>
+    public int ListaTipo { get; set; }
+    public string ListaClavePeriodo { get; set; } = "";
+}
+
+public class RegistroHabitoSyncPayload
+{
+    public Guid HabitoClientId { get; set; }
+    public DateTime Fecha { get; set; }
+    public bool? ValorBooleano { get; set; }
+    public int? ValorNumerico { get; set; }
+}

@@ -15,6 +15,14 @@ public class SyncPullDTO
 
     public List<EscritoDTO> Escritos { get; set; } = new();
 
+    public List<HabitoDTO> Habitos { get; set; } = new();
+
+    public List<RegistroHabitoDTO> RegistrosHabito { get; set; } = new();
+
+    public List<ListaObjetivoDTO> ListasObjetivo { get; set; } = new();
+
+    public List<ItemObjetivoDTO> ItemsObjetivo { get; set; } = new();
+
     public List<TombstoneDTO> Eliminados { get; set; } = new();
 }
 

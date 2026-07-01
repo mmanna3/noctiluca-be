@@ -17,4 +17,8 @@ public class HabitoDTO : DTO
     public int? MetaMinutos { get; set; }
 
     public int CantidadRegistros { get; set; }
+
+    public Guid ClientId { get; set; }
+    public long Version { get; set; }
+    public DateTime ActualizadoEn { get; set; }
 }

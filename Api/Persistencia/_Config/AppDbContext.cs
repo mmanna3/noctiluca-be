@@ -83,6 +83,10 @@ public class AppDbContext : DbContext
         // Sincronización offline-first
         builder.Entity<Carpeta>().HasIndex(c => c.ClientId).IsUnique();
         builder.Entity<Escrito>().HasIndex(e => e.ClientId).IsUnique();
+        builder.Entity<Habito>().HasIndex(h => h.ClientId).IsUnique();
+        builder.Entity<RegistroHabito>().HasIndex(r => r.ClientId).IsUnique();
+        builder.Entity<ListaObjetivo>().HasIndex(l => l.ClientId).IsUnique();
+        builder.Entity<ItemObjetivo>().HasIndex(i => i.ClientId).IsUnique();
         builder.Entity<Tombstone>().HasIndex(t => t.Version);
         builder.Entity<SyncOpLog>().HasIndex(s => s.ClientOpId).IsUnique();
 
