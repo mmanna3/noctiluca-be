@@ -23,4 +23,8 @@ public class CarpetaDTO : DTO
     public bool EsSistema { get; set; }
 
     public PropositoCarpetaEnum? PropositoCarpeta { get; set; }
+
+    public Guid ClientId { get; set; }
+    public long Version { get; set; }
+    public DateTime ActualizadoEn { get; set; }
 }

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Api.Core.Entidades;
 
-public class Escrito : Entidad
+public class Escrito : EntidadSincronizable
 {
     [MaxLength(255)]
     public required string Titulo { get; set; }

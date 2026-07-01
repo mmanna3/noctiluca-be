@@ -21,6 +21,7 @@ public class MapperConfig : Profile
 
         CreateMap<Escrito, EscritoDTO>()
             .ForMember(dest => dest.CarpetaTitulo, x => x.MapFrom(src => src.Carpeta!.Titulo))
+            .ForMember(dest => dest.CarpetaClientId, x => x.MapFrom(src => src.Carpeta!.ClientId))
             .PreserveReferences();
         
         CreateMap<EscritoDTO, Escrito>()
