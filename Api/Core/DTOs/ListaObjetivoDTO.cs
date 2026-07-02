@@ -17,4 +17,8 @@ public class ListaObjetivoDTO : DTO
     public ICollection<ItemObjetivoDTO> Items { get; set; } = new List<ItemObjetivoDTO>();
 
     public string? AdvertenciaLimite { get; set; }
+
+    public Guid ClientId { get; set; }
+    public long Version { get; set; }
+    public DateTime ActualizadoEn { get; set; }
 }

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Api.Core.Entidades;
 
-public class RegistroHabito : Entidad
+public class RegistroHabito : EntidadSincronizable
 {
     public int HabitoId { get; set; }
 

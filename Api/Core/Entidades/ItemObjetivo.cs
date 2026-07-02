@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Api.Core.Entidades;
 
-public class ItemObjetivo : Entidad
+public class ItemObjetivo : EntidadSincronizable
 {
     public int ListaObjetivoId { get; set; }
     public virtual ListaObjetivo ListaObjetivo { get; set; } = null!;

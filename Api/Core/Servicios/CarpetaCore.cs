@@ -20,6 +20,16 @@ public class CarpetaCore : ABMCore<ICarpetaRepo, Carpeta, CarpetaDTO>, ICarpetaC
         Carpeta entidadNueva)
     {
         ValidarCarpetaSistema(entidadAnterior, "modificar");
+
+        if (entidadAnterior.EsSistema && dto.RequiereAutenticacion != entidadAnterior.RequiereAutenticacion)
+            throw new ExcepcionControlada("No se puede cambiar la privacidad de una carpeta del sistema");
+
+        if (entidadAnterior.CarpetaPadreId.HasValue && dto.RequiereAutenticacion)
+            throw new ExcepcionControlada("Solo las carpetas raíz pueden ser privadas");
+
+        if (entidadAnterior.CarpetaPadreId.HasValue)
+            entidadNueva.RequiereAutenticacion = false;
+
         return Task.FromResult(entidadNueva);
     }
     
@@ -33,6 +43,8 @@ public class CarpetaCore : ABMCore<ICarpetaRepo, Carpeta, CarpetaDTO>, ICarpetaC
 
             if (carpetaPadre.CarpetaPadreId.HasValue)
                 throw new ExcepcionControlada("No se puede crear una carpeta dentro de una subcarpeta (máximo 2 niveles de profundidad)");
+
+            entidad.RequiereAutenticacion = false;
         }
 
         return entidad;

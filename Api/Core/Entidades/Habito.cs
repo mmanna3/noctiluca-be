@@ -3,7 +3,7 @@ using Api.Core.Enums;
 
 namespace Api.Core.Entidades;
 
-public class Habito : Entidad
+public class Habito : EntidadSincronizable
 {
     [Required, MaxLength(50)]
     public required string Nombre { get; set; }

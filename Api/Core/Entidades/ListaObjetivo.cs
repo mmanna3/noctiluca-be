@@ -3,7 +3,7 @@ using Api.Core.Enums;
 
 namespace Api.Core.Entidades;
 
-public class ListaObjetivo : Entidad
+public class ListaObjetivo : EntidadSincronizable
 {
     public TipoListaObjetivoEnum Tipo { get; set; }
 

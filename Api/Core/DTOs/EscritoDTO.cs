@@ -10,4 +10,10 @@ public class EscritoDTO : DTO
     public DateTime? FechaHoraEdicion { get; set; }
     public int CarpetaId { get; set; }
     public string? CarpetaTitulo { get; set; }
+    public Guid? CarpetaClientId { get; set; }
+    public bool EstaEnPapelera { get; set; }
+
+    public Guid ClientId { get; set; }
+    public long Version { get; set; }
+    public DateTime ActualizadoEn { get; set; }
 }

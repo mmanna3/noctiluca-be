@@ -21,6 +21,7 @@ public class MapperConfig : Profile
 
         CreateMap<Escrito, EscritoDTO>()
             .ForMember(dest => dest.CarpetaTitulo, x => x.MapFrom(src => src.Carpeta!.Titulo))
+            .ForMember(dest => dest.CarpetaClientId, x => x.MapFrom(src => src.Carpeta!.ClientId))
             .PreserveReferences();
         
         CreateMap<EscritoDTO, Escrito>()
@@ -35,6 +36,7 @@ public class MapperConfig : Profile
             .PreserveReferences();
 
         CreateMap<RegistroHabito, RegistroHabitoDTO>()
+            .ForMember(dest => dest.HabitoClientId, x => x.Ignore())
             .PreserveReferences();
 
         CreateMap<RegistroHabitoDTO, RegistroHabito>()
@@ -47,6 +49,8 @@ public class MapperConfig : Profile
             .PreserveReferences();
 
         CreateMap<ItemObjetivo, ItemObjetivoDTO>()
+            .ForMember(dest => dest.ListaTipo, x => x.Ignore())
+            .ForMember(dest => dest.ListaClavePeriodo, x => x.Ignore())
             .PreserveReferences();
     }
 }

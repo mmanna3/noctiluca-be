@@ -3,7 +3,7 @@ using Api.Core.Enums;
 
 namespace Api.Core.Entidades;
 
-public class Carpeta : Entidad
+public class Carpeta : EntidadSincronizable
 {
     [MaxLength(100)]
     public required string Titulo { get; set; }
