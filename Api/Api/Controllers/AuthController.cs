@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Api.Core.DTOs;
 using Api.Core.Servicios;
 using Microsoft.AspNetCore.Authorization;
@@ -27,6 +28,22 @@ public class AuthController : ControllerBase
             return BadRequest(response);
         }
         
+        return Ok(response);
+    }
+
+    [HttpPost("validar-password")]
+    [Authorize]
+    public async Task<ActionResult<ValidarPasswordResponseDTO>> ValidarPassword(ValidarPasswordDTO dto)
+    {
+        var nombreUsuario = User.FindFirstValue(ClaimTypes.Name);
+        if (string.IsNullOrEmpty(nombreUsuario))
+            return Unauthorized();
+
+        var response = await _authService.ValidarPassword(nombreUsuario, dto);
+
+        if (!response.Exito)
+            return BadRequest(response);
+
         return Ok(response);
     }
 

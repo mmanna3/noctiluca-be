@@ -195,6 +195,9 @@ public class SyncCore : ISyncCore
 
         if (existente == null)
         {
+            if (carpetaPadreId.HasValue)
+                payload.RequiereAutenticacion = false;
+
             var nueva = new Carpeta
             {
                 Id = 0,
@@ -213,6 +216,12 @@ public class SyncCore : ISyncCore
 
         if (HayConflictoYPierdeElCliente(op, existente))
             return Rechazado(op, existente.Id, existente.Version);
+
+        if (existente.EsSistema && payload.RequiereAutenticacion != existente.RequiereAutenticacion)
+            return Error(op, "No se puede cambiar la privacidad de una carpeta del sistema");
+
+        if (existente.CarpetaPadreId.HasValue)
+            payload.RequiereAutenticacion = false;
 
         existente.Titulo = payload.Titulo;
         existente.RequiereAutenticacion = payload.RequiereAutenticacion;

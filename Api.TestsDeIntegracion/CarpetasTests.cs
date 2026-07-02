@@ -172,4 +172,51 @@ public class CarpetasTests : IClassFixture<NoctilucaWebApplicationFactory>
         Assert.Equal(2, c1.Posicion);
         Assert.Equal(1, c2.Posicion);
     }
+
+    [Fact]
+    public async Task ModificarCarpetaRaiz_PuedeSerPrivada_OK()
+    {
+        var carpeta = await CrearCarpetaEnDB("Privada " + Guid.NewGuid());
+        var dto = new CarpetaDTO { Id = carpeta.Id, Titulo = carpeta.Titulo, RequiereAutenticacion = true };
+
+        var response = await _client.PutAsJsonAsync($"/api/Carpeta/{carpeta.Id}", dto);
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var modificada = await db.Carpetas.AsNoTracking().SingleAsync(c => c.Id == carpeta.Id);
+        Assert.True(modificada.RequiereAutenticacion);
+    }
+
+    [Fact]
+    public async Task ModificarSubcarpeta_ComoPrivada_Error()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var raiz = new Carpeta { Id = 0, Titulo = "Raiz " + Guid.NewGuid(), CriterioDeOrdenId = 1 };
+        db.Carpetas.Add(raiz);
+        await db.SaveChangesAsync();
+        var sub = new Carpeta
+        {
+            Id = 0,
+            Titulo = "Sub " + Guid.NewGuid(),
+            CriterioDeOrdenId = 1,
+            CarpetaPadreId = raiz.Id,
+        };
+        db.Carpetas.Add(sub);
+        await db.SaveChangesAsync();
+
+        var dto = new CarpetaDTO
+        {
+            Id = sub.Id,
+            Titulo = sub.Titulo,
+            CarpetaPadreId = raiz.Id,
+            RequiereAutenticacion = true,
+        };
+
+        var response = await _client.PutAsJsonAsync($"/api/Carpeta/{sub.Id}", dto);
+
+        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+    }
 }

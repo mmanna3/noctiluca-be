@@ -64,6 +64,32 @@ public class AuthCore : IAuthService
         };
     }
 
+    public async Task<ValidarPasswordResponseDTO> ValidarPassword(string nombreUsuario, ValidarPasswordDTO dto)
+    {
+        var usuario = await _context.Usuarios
+            .FirstOrDefaultAsync(u => u.NombreUsuario == nombreUsuario);
+
+        if (usuario == null || usuario.Password == null)
+        {
+            return new ValidarPasswordResponseDTO
+            {
+                Exito = false,
+                Error = "Usuario o contraseña incorrectos",
+            };
+        }
+
+        if (!VerificarPasswordHash(dto.Password, usuario.Password))
+        {
+            return new ValidarPasswordResponseDTO
+            {
+                Exito = false,
+                Error = "Usuario o contraseña incorrectos",
+            };
+        }
+
+        return new ValidarPasswordResponseDTO { Exito = true };
+    }
+
     public async Task<LoginResponseDTO> CambiarPassword(CambiarPasswordDTO dto)
     {
         var usuario = await _context.Usuarios

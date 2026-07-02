@@ -243,4 +243,30 @@ public class SyncTests : IClassFixture<NoctilucaWebApplicationFactory>
         Assert.Equal("v2", escritos[0].Titulo);
         Assert.Equal("cuerpo nuevo", escritos[0].Cuerpo);
     }
+
+    [Fact]
+    public async Task Push_SubcarpetaConPrivacidad_FuerzaRequiereAutenticacionFalse()
+    {
+        var raizClientId = Guid.NewGuid();
+        var subClientId = Guid.NewGuid();
+
+        await Push(
+            Op("carpeta", "upsert", raizClientId, new CarpetaSyncPayload
+            {
+                Titulo = "Raiz sync",
+                CriterioDeOrden = 1,
+            }),
+            Op("carpeta", "upsert", subClientId, new CarpetaSyncPayload
+            {
+                Titulo = "Sub sync",
+                CriterioDeOrden = 1,
+                CarpetaPadreClientId = raizClientId,
+                RequiereAutenticacion = true,
+            }));
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var sub = await db.Carpetas.AsNoTracking().SingleAsync(c => c.ClientId == subClientId);
+        Assert.False(sub.RequiereAutenticacion);
+    }
 }
