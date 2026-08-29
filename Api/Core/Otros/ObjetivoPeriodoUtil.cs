@@ -7,6 +7,8 @@ public static class ObjetivoPeriodoUtil
 {
     public const int LimiteRecomendadoDia = 7;
 
+    public const int AniosPorLustro = 5;
+
     public static string ClaveDia(DateTime fecha) =>
         fecha.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
@@ -20,12 +22,23 @@ public static class ObjetivoPeriodoUtil
     public static string ClaveMes(DateTime fecha) =>
         fecha.Date.ToString("yyyy-MM", CultureInfo.InvariantCulture);
 
+    public static string ClaveAnio(DateTime fecha) =>
+        fecha.Date.ToString("yyyy", CultureInfo.InvariantCulture);
+
+    public static string ClaveLustro(DateTime fecha)
+    {
+        var anioInicio = AnioInicioLustro(fecha.Year);
+        return $"{anioInicio:D4}-{anioInicio + AniosPorLustro - 1:D4}";
+    }
+
     public static string ObtenerClavePeriodo(TipoListaObjetivoEnum tipo, DateTime fecha) =>
         tipo switch
         {
             TipoListaObjetivoEnum.Dia => ClaveDia(fecha),
             TipoListaObjetivoEnum.Semana => ClaveSemana(fecha),
             TipoListaObjetivoEnum.Mes => ClaveMes(fecha),
+            TipoListaObjetivoEnum.Anio => ClaveAnio(fecha),
+            TipoListaObjetivoEnum.Lustro => ClaveLustro(fecha),
             _ => throw new ArgumentOutOfRangeException(nameof(tipo)),
         };
 
@@ -40,6 +53,8 @@ public static class ObjetivoPeriodoUtil
             TipoListaObjetivoEnum.Dia => (fecha, fecha),
             TipoListaObjetivoEnum.Semana => ObtenerRangoSemana(fecha),
             TipoListaObjetivoEnum.Mes => ObtenerRangoMes(fecha),
+            TipoListaObjetivoEnum.Anio => ObtenerRangoAnio(fecha),
+            TipoListaObjetivoEnum.Lustro => ObtenerRangoLustro(fecha),
             _ => throw new ArgumentOutOfRangeException(nameof(tipo)),
         };
     }
@@ -53,6 +68,8 @@ public static class ObjetivoPeriodoUtil
             TipoListaObjetivoEnum.Dia => ParsearClaveDia(clavePeriodo),
             TipoListaObjetivoEnum.Semana => ParsearClaveSemana(clavePeriodo),
             TipoListaObjetivoEnum.Mes => ParsearClaveMes(clavePeriodo),
+            TipoListaObjetivoEnum.Anio => ParsearClaveAnio(clavePeriodo),
+            TipoListaObjetivoEnum.Lustro => ParsearClaveLustro(clavePeriodo),
             _ => throw new ArgumentOutOfRangeException(nameof(tipo)),
         };
     }
@@ -71,6 +88,24 @@ public static class ObjetivoPeriodoUtil
         var fin = inicio.AddMonths(1).AddDays(-1);
         return (inicio, fin);
     }
+
+    private static (DateTime inicio, DateTime fin) ObtenerRangoAnio(DateTime fecha)
+    {
+        var inicio = new DateTime(fecha.Year, 1, 1);
+        var fin = inicio.AddYears(1).AddDays(-1);
+        return (inicio, fin);
+    }
+
+    private static (DateTime inicio, DateTime fin) ObtenerRangoLustro(DateTime fecha)
+    {
+        var inicio = new DateTime(AnioInicioLustro(fecha.Year), 1, 1);
+        var fin = inicio.AddYears(AniosPorLustro).AddDays(-1);
+        return (inicio, fin);
+    }
+
+    // Ancla el lustro a bloques fijos de calendario que empiezan en años múltiplos de 5
+    // (2025-2029, 2030-2034, ...). Es una ventana fija, no móvil.
+    private static int AnioInicioLustro(int anio) => anio - anio % AniosPorLustro;
 
     private static (DateTime inicio, DateTime fin) ParsearClaveDia(string clave)
     {
@@ -108,6 +143,30 @@ public static class ObjetivoPeriodoUtil
             throw new ArgumentException("Clave de mes inválida", nameof(clave));
 
         var fin = inicio.AddMonths(1).AddDays(-1);
+        return (inicio, fin);
+    }
+
+    private static (DateTime inicio, DateTime fin) ParsearClaveAnio(string clave)
+    {
+        if (!int.TryParse(clave, NumberStyles.None, CultureInfo.InvariantCulture, out var anio))
+            throw new ArgumentException("Clave de año inválida", nameof(clave));
+
+        var inicio = new DateTime(anio, 1, 1);
+        var fin = inicio.AddYears(1).AddDays(-1);
+        return (inicio, fin);
+    }
+
+    private static (DateTime inicio, DateTime fin) ParsearClaveLustro(string clave)
+    {
+        var partes = clave.Split('-', StringSplitOptions.TrimEntries);
+        if (partes.Length != 2
+            || !int.TryParse(partes[0], NumberStyles.None, CultureInfo.InvariantCulture, out var anioInicio)
+            || !int.TryParse(partes[1], NumberStyles.None, CultureInfo.InvariantCulture, out var anioFin)
+            || anioFin != anioInicio + AniosPorLustro - 1)
+            throw new ArgumentException("Clave de lustro inválida", nameof(clave));
+
+        var inicio = new DateTime(anioInicio, 1, 1);
+        var fin = inicio.AddYears(AniosPorLustro).AddDays(-1);
         return (inicio, fin);
     }
 }
