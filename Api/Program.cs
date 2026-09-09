@@ -16,6 +16,8 @@ try
     builder = InyeccionDeDependenciasConfig.Configurar(builder);
 
     builder.Services.AddControllers();
+
+    builder.Services.AddCors();
     
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
@@ -42,8 +44,7 @@ try
         app.UseSwagger();
         app.UseSwaggerUI();
         app.UseDeveloperExceptionPage();
-        app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
-        
+
         var localIp = LocalIpAddress();
         app.Urls.Add($"http://0.0.0.0:5072");
         app.Urls.Add($"http://{localIp}:5072");
@@ -52,9 +53,13 @@ try
 
     app.UseOpenApi();
     app.UseExceptionHandler();
-        
+
     // app.UseHttpsRedirection();
-    
+
+    // CORS para la web servida desde otro origen (EAS Hosting). En iOS no aplica
+    // y la web servida desde wwwroot es same-origin, así que no molesta.
+    app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+
     app.UseDefaultFiles();
     app.UseStaticFiles();
 
